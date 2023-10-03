@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    container_name: ds_postgres
+    env_file:
+      - .env
+  ds_django:
+    build:
+      dockerfile: Dockerfile
+      context: ./src/django_rest_project
+    image: ds_django:latest
+    container_name: ds_django
+    depends_on:
+      - db
+    links:
+      - db
+    volumes:
+      - media_volume:/home/user_djan/django_project/media
+      - static_volume:/home/user_djan/django_project/static
+    env_file:
+      - .env
+    command: >
+      bash -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "${NGINX_EXTERNAL_PORT}:8000"
+volumes:
+  media_volume:
+  static_volume:
